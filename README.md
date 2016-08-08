@@ -18,6 +18,10 @@ edit `settings.py`
 - `date`: enter the date of data you want to process
 - `time_interval`: choose the time interval between two points
 
+then run `main.py`
+the result file will be generated at the same path as its source file.
+meanwhile a file named `data.log` will be generated at the root path of the project to provide you with some additional information
+
 ##caveats
 
  This program now can only process data stored in `.xls` file.
