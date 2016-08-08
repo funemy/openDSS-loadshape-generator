@@ -9,7 +9,7 @@ copy the three python files to your project(actually, place the files at any pat
 
 edit `settings.py`
 
-- `project_path`: path to your project. If the python files are placed in the project, then left skip it.
+- `project_path`: path to your project. If the python files are placed within the project, then skip it.
 - `data_path`: the name of repository you place your source data files
 - `sheets`: If the source data files has more than one sheet, enter the list of names of sheets your want to process
 - `sheets_index`: same as above, but in the form of index.
