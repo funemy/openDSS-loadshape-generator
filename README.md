@@ -1,9 +1,9 @@
-##openDSS daily Loadshape generator
+#openDSS daily Loadshape generator
 
 This is a simple program for generating Loadshape curve for openDSS Modeling.
 The loadshape curve will be output as csv files
 
-####usage
+##usage
 
 copy the three python files to your project(actually, place the files at any path is fine)
 
@@ -18,13 +18,13 @@ edit `settings.py`
 - `date`: enter the date of data you want to process
 - `time_interval`: choose the time interval between two points
 
-####caveats
+##caveats
 
  This program now can only process data stored in `.xls` file.
  This program assumes the minimum time interval is 15 minutes, and now it only support switching between 15-minutes and 1-hour.
  If more than one sheets in a single `.xls` file are proecessed by this program, the result of last sheet will override all previous ones.
 
-####TODO
+##TODO
 
 - csv source data file supported
 - yearly loadshape generator
