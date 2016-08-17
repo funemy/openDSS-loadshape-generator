@@ -40,7 +40,6 @@ meanwhile a file named `data.log` will be generated at the root path of the proj
 - a better solution to determine the time delta of the original data
 - GUI?
 
----
 ##change logs
 
 - v0.0.2 (2016-8-16):
