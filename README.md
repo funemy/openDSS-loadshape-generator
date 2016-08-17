@@ -48,6 +48,7 @@ meanwhile a file named `data.log` will be generated at the root path of the proj
   - the implementation of `fix_time_interval` is now more scientific
   - there are more setting options
   - now the program only complement the missing data in the middle, so it's better to choose a date in the middle in case the original data is not complete
+  - this version will process any 'csv' and 'xls' including curve generated last time. This will be soon fixed.
 
 ----
 If there are any interesting features that can be added to this program to make openDSS modeling easier,
