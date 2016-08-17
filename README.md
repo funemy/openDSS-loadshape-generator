@@ -26,9 +26,13 @@ meanwhile a file named `data.log` will be generated at the root path of the proj
 ##caveats
 
 - this program now can only help you generating daily loadshape curve, so the time interval can only be `5m`/`15m`/`1h` since these are the most common time interval for sampling
+
 - please don't save more than 1 sheets in the `xls` files. The program can still running for now, but the latter one will override the curve of the former. This may never be supported.
+
 - feel free to add column names in the setting even if some of the sheets don't have the column of that name.(since different sheets may have column names. Personally I hate that)
+
 - now the program will process any `csv` and `xls` files including the curve generated last time. This may throw an error. So make sure there are only original data files in the repository every time you run the program.
+
 - the program will auto complement the missing data in the middle, so when choose a date from a period, it is better to choose a date in the middle, or the curve will not be complete.
 
 ##TODO
