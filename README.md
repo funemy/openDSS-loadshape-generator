@@ -15,6 +15,7 @@ edit `settings.py`
 - `sheets_index`: same as above, but in the form of index.
 - `col_names`: enter the list of column names you want to process
 - `date_col`: if you want to select the data of a certain day, please enter the column name of date
+- `date_col_index`: this option is prior to `date_col`, since the names of date column are not always the same, but in most cases they are placed at first.
 - `date`: enter the date of data you want to process
 - `time_interval`: choose the time interval between two points
 
