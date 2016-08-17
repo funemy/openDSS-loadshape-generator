@@ -30,7 +30,7 @@ meanwhile a file named `data.log` will be generated at the root path of the proj
 
 ##TODO
 
-- csv source data file supported
+- <del>csv source data file supported</del>
 - yearly loadshape generator
 - better solution for fixing missing/wrong data
 - auto generate `.dss` file
