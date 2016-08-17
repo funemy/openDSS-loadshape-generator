@@ -24,9 +24,11 @@ meanwhile a file named `data.log` will be generated at the root path of the proj
 
 ##caveats
 
- This program now can only process data stored in `.xls` file.
- This program assumes the minimum time interval is 15 minutes, and now it only support switching between 15-minutes and 1-hour.
- If more than one sheets in a single `.xls` file are proecessed by this program, the result of last sheet will override all previous ones.
+- this program now can only help you generating daily loadshape curve, so the time interval can only be `5m`/`15m`/`1h` since these are the most common time interval for sampling
+- please don't save more than 1 sheets in the `xls` files. The program can still running for now, but the latter one will override the curve of the former. This may never be supported.
+- feel free to add column names in the setting even if some of the sheets don't have the column of that name.(since different sheets may have column names. Personally I hate that)
+- now the program will process any `csv` and `xls` files including the curve generated last time. This may throw an error. So make sure there are only original data files in the repository every time you run the program.
+- the program will auto complement the missing data in the middle, so when choose a date from a period, it is better to choose a date in the middle, or the curve will not be complete.
 
 ##TODO
 
@@ -35,12 +37,20 @@ meanwhile a file named `data.log` will be generated at the root path of the proj
 - better solution for fixing missing/wrong data
 - auto generate `.dss` file
 - multi-sheets support
+- a better solution to determine the time delta of the original data
 - GUI?
 
+---
+##change logs
+
+- v0.0.2 (2016-8-16):
+  - add csv file support
+  - add one more time interval choice '5m'
+  - the implementation of `fix_time_interval` is now more scientific
+  - there are more setting options
+  - now the program only complement the missing data in the middle, so it's better to choose a date in the middle in case the original data is not complete
+
 ----
-
-This project will probably not be updated anymore since it already satify my own request.
-
 If there are any interesting features that can be added to this program to make openDSS modeling easier,
 
 I'm still willing to do some further development.
