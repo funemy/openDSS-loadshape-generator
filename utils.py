@@ -29,7 +29,11 @@ def strip_symbol(name):
 格式化为datetime对象
 '''
 def str_to_datetime(timestr):
-    return datetime.datetime.strptime(timestr, "%Y-%m-%d %H:%M:%S")
+    try:
+        dt = datetime.datetime.strptime(timestr, "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        dt = datetime.datetime.strptime(timestr, "%Y/%m/%d %H:%M:%S")
+    return dt
 
 def str_to_time(timestr):
     unit = timestr[-1]
@@ -63,7 +67,7 @@ def clear_log(date):
 '''
 def write_log(desc, npts, type, max):
     f = open("data.log", 'a')
-    f.write("%s npts=%d max-k%s=%g\n" % (desc, npts, type, max))
+    f.write("%s npts=%d max-%s=%g\n" % (desc, npts, type, max))
     f.close
 
 '''
@@ -116,6 +120,30 @@ def read_recursive_dir(path):
     return all_file_list
 
 '''
+输入cols
+若存在date_col,则获取数据的时间间隔
+'''
+def get_time_delta(cols):
+    if 'date_col' not in cols.keys():
+        return None
+    # 获取数据的时间间隔
+    delta1 = str_to_datetime(cols['date_col']['list'][0]) - str_to_datetime(cols['date_col']['list'][1])
+    delta2 = str_to_datetime(cols['date_col']['list'][-2]) - str_to_datetime(cols['date_col']['list'][-1])
+    # print(cols)
+    # print('d1', delta1)
+    # print('d2', delta2)
+    if delta1 == delta2:
+        delta = delta1
+    else:
+        delta3 = str_to_datetime(cols['date_col']['list'][2]) - str_to_datetime(cols['date_col']['list'][3])
+        if delta3 == delta1:
+            delta = delta1
+        else:
+            delta = delta2
+    return delta
+
+
+'''
 读取csv文件
 并将数据转换成list返回
 暂时无用
@@ -124,7 +152,7 @@ def get_csv_list(csv_path):
     with open(csv_path) as csv_file:
         reader = csv.reader(csv_file)
         csv_list = list(reader)
-    return csv_list
+    return (csv_list, csv_path)
 
 '''
 获取xls文件的对应表单
@@ -154,32 +182,71 @@ def get_xls_tables(xls_path, sheets=[], index=[]):
     return (tables, xls_path)
 
 '''
-暂时无用
+获取csv文件的列
 '''
-def get_csv_column(csv_list, col_names=[]):
+def get_csv_column(csv_list, col_names=[], date_col_index=None, date_col=None):
+    file_name = csv_list[1]
+    csv_list = csv_list[0]
     cols = {}
+    if date_col_index is not None or date_col:
+        if date_col_index is not None:
+            tmp_list = [row[date_col_index] for row in csv_list]
+        elif date_col:
+            title = [x.strip() for x in csv_list[0]]
+            date_col_index = title.index(date_col.strip())
+            tmp_list = [row[date_col_index] for row in csv_list]
+        tmp_list = tmp_list[1:]
+        cols['date_col'] = {'list': tmp_list,
+                            'index': date_col_index,
+                            'npts': len(tmp_list)}
     if col_names:
+        title = [x.strip() for x in csv_list[0]]
+        col_names = [x.strip() for x in col_names]
         for n in col_names:
-            if n in csv_list[0]:
-                index = csv_list[0].index(n)
-                tmp_list = [row[index] for row in csv_list]
-                cols[n] = {'list': tmp_list, 'index': index}
+            if n in title:
+                i = title.index(n)
+                tmp_list = [row[i] for row in csv_list]
+                list_name = tmp_list[0].strip()
+                tmp_list = tmp_list[1:]
+                cols[n] = {'list': tmp_list,
+                           'index': i,
+                           'list_name': list_name,
+                           'file_name': file_name,
+                           'npts': len(tmp_list)}
     else:
-        index = 0
-        tmp_list = [row[0] for row in csv_list]
-        cols[0] = {'list': tmp_list, 'index': index}
+        for i in range(len(csv_list[0])):
+            list_name = csv_list[0][i].strip()
+            tmp_list = [row[i] for row in csv_list]
+            tmp_list = tmp_list[1:]
+            cols[list_name] = {'list': tmp_list,
+                               'index': i,
+                               'list_name': list_name,
+                               'file_name': file_name,
+                               'npts':len(tmp_list)}
     return cols
 
 '''
 若不传col_name参数则输出所有列的数据
 '''
-def get_table_column(tables, date_col, col_names=[]):
+def get_table_column(tables, col_names=[], date_col_index=None, date_col=None):
     file_name = tables[1]
     tables = tables[0]
+    indexes = []
     cols = {}
+    if date_col_index is not None or date_col:
+        if date_col_index is not None:
+            for table_name in tables:
+                t = tables[table_name]
+                tmp_list = t.col_values(date_col_index)[1:]
+        elif date_col:
+            for table_name in tables:
+                t = tables[table_name]
+                date_col_index = t.row_values(0).index(date_col)
+                tmp_list = t.col_values(date_col_index)[1:]
+        cols['date_col'] = {'list': tmp_list,
+                            'index': date_col_index,
+                            'npts': len(tmp_list)}
     if col_names:
-        if date_col:
-            col_names.append(date_col)
         for n in col_names:
             for table_name in tables:
                 t = tables[table_name]
@@ -189,7 +256,7 @@ def get_table_column(tables, date_col, col_names=[]):
                     cols[strip_symbol(n)] = {'list': tmp_list,
                                              'index': index,
                                              'table_name': table_name,
-                                             'list_name': n,
+                                             'list_name': n.strip(),
                                              'file': file_name,
                                              'npts': len(tmp_list)}
     else:
@@ -201,7 +268,7 @@ def get_table_column(tables, date_col, col_names=[]):
                 cols[strip_symbol(n)] = {'list': tmp_list,
                                          'index': i,
                                          'table_name': table_name,
-                                         'list_name': n,
+                                         'list_name': n.strip(),
                                          'file': file_name,
                                          'npts': len(tmp_list)}
     return cols
@@ -209,26 +276,28 @@ def get_table_column(tables, date_col, col_names=[]):
 '''
 暂时无用
 '''
-def read_csv_len(csv_list=None, csv_path=None):
-    if csv_list:
-        return len(csv_list)
-    elif csv_path:
-        with open(csv_path) as csv_file:
-            reader = csv.reader(csv_file)
-            csv_list = list(reader)
-        return len(csv_list)
-    else:
-        raise TypeError("两个参数至少有一个不为空")
+# def read_csv_len(csv_list=None, csv_path=None):
+#     if csv_list:
+#         return len(csv_list)
+#     elif csv_path:
+#         with open(csv_path) as csv_file:
+#             reader = csv.reader(csv_file)
+#             csv_list = list(reader)
+#         return len(csv_list)
+#     else:
+#         raise TypeError("两个参数至少有一个不为空")
 
 '''
 数据有不整齐，
-某些数据采集间隔为1h,30m,15m不等
-此函数将时间间隔统一化为15m
+某些数据采集间隔为1h,15m,5m不等
 缺失点用其他时间点数据填补
 多余点忽略
 '''
-def fix_time_interval(cols, date_col):
-    delta = str_to_datetime(cols[date_col]['list'][0]) - str_to_datetime(cols[date_col]['list'][1])
+def fix_time_interval(cols, time_interval):
+    if 'date_col' not in cols.keys():
+        return cols
+    # 获取数据的时间间隔
+    delta = get_time_delta(cols)
     # 判断时间的升降序
     if delta.total_seconds() > 0:
         order = 'desc'
@@ -236,39 +305,44 @@ def fix_time_interval(cols, date_col):
         order = 'asc'
     # 得到时间点的范围
     date_range = set()
-    for d in cols[date_col]['list']:
+    for d in cols['date_col']['list']:
         fd = str_to_datetime(d)
         date_range.add(date_to_datetime(fd.date()))
     date_range = list(date_range)
     date_range.sort()
     maxt = date_range[-1] + datetime.timedelta(0, 85500)
     mint = date_range[0]
-    total_pts = int((maxt - mint) / datetime.timedelta(0, 900))
+    total_pts = int((maxt - mint).total_seconds() / str_to_time(time_interval))+1
+    time_interval = datetime.timedelta(0, str_to_time(time_interval))
+    step = 1 if abs(time_interval / delta) < 1 else abs(int(time_interval / delta))
     for i in range(total_pts):
-        delta = datetime.timedelta(0, 900*i)
+        dlt = time_interval * i
+        i = i * step
         if order == 'desc':
-            time_pt = datetime_to_str(maxt - delta)
-            if i >= len(cols[date_col]['list']):
-                cols[date_col]['list'].insert(i, time_pt)
+            time_pt = maxt - dlt
+            if i >= len(cols['date_col']['list']):
+                break
+                # cols['date_col']['list'].insert(i, time_pt)
+                # for col_name in cols:
+                #     if col_name != 'date_col':
+                #         cols[col_name]['list'].insert(i, "")
+            if str_to_datetime(cols['date_col']['list'][i]) != time_pt:
+                cols['date_col']['list'].insert(i, datetime_to_str(time_pt))
                 for col_name in cols:
-                    if col_name != date_col:
-                        cols[col_name]['list'].insert(i, "")
-            if cols[date_col]['list'][i] != time_pt:
-                cols[date_col]['list'].insert(i, time_pt)
-                for col_name in cols:
-                    if col_name != date_col:
+                    if col_name != 'date_col':
                         cols[col_name]['list'].insert(i, "")
         elif order == 'asc':
-            time_pt = datetime_to_str(mint + delta)
-            if i >= len(cols[date_col]['list']):
-                cols[date_col]['list'].insert(i, time_pt)
+            time_pt = mint + dlt
+            if i >= len(cols['date_col']['list']):
+                break
+                # cols['date_col']['list'].insert(i, time_pt)
+                # for col_name in cols:
+                #     if col_name != 'date_col':
+                #         cols[col_name]['list'].insert(i, "")
+            if str_to_datetime(cols['date_col']['list'][i]) != time_pt:
+                cols['date_col']['list'].insert(i, datetime_to_str(time_pt))
                 for col_name in cols:
-                    if col_name != date_col:
-                        cols[col_name]['list'].insert(i, "")
-            if cols[date_col]['list'][i] != time_pt:
-                cols[date_col]['list'].insert(i, time_pt)
-                for col_name in cols:
-                    if col_name != date_col:
+                    if col_name != 'date_col':
                         cols[col_name]['list'].insert(i, "")
     return cols
 
@@ -277,9 +351,9 @@ def fix_time_interval(cols, date_col):
 首尾数据若有缺失，用最邻近点的数据补足
 中间数据若有缺失，用前后的数据取平均
 '''
-def check_missing_data(cols, date_col):
+def check_missing_data(cols):
     for col_name in cols:
-        if col_name == date_col:
+        if col_name == 'date_col':
             continue
         col_list = cols[col_name]['list']
         if col_list[-1] == '':
@@ -307,9 +381,9 @@ def check_missing_data(cols, date_col):
 找到一列数据中的最大值
 返回cols字典
 '''
-def max_column_data(cols, date_col):
+def max_column_data(cols):
     for col_name in cols:
-        if col_name == date_col:
+        if col_name == 'date_col':
             continue
         max = None
         l = cols[col_name]['list']
@@ -328,9 +402,9 @@ def max_column_data(cols, date_col):
 '''
 将数据根据最大值进行归一化
 '''
-def standardize_col_data(cols, date_col):
+def standardize_col_data(cols):
     for col_name in cols:
-        if col_name == date_col:
+        if col_name == 'date_col':
             continue
         standard_list = []
         max = cols[col_name]['max']
@@ -348,15 +422,16 @@ def standardize_col_data(cols, date_col):
 截取点间隔可选取为15m或1h
 保存为新的standardize_list
 '''
-def select_data_period(cols, date_col, date, time_interval):
-    if date_col in cols.keys():
+def select_data_period(cols, date, time_interval):
+    if 'date_col' in cols.keys():
         td = datetime.datetime.strptime(date, '%m-%d')
         start = 0
         end = 0
-        list_end = len(cols[date_col]['list'])
         npts = 0
-        step = int(str_to_time(time_interval) / 900)
-        for i,d in enumerate(cols[date_col]['list']):
+        delta = abs(get_time_delta(cols).total_seconds())
+        step = int(str_to_time(time_interval) / delta)
+        ratio = int(3600 / delta)
+        for i,d in enumerate(cols['date_col']['list']):
             fd = str_to_datetime(d)
             if time_interval == '1h':
                 if td.month != fd.month or td.day != fd.day:
@@ -365,18 +440,18 @@ def select_data_period(cols, date_col, date, time_interval):
                     if not end:
                         start += 1
                 else:
-                    end = start + 96
+                    end = start + 24 * ratio
                     break
-            elif time_interval == '15m':
+            elif time_interval in ['15m', '5m']:
                 if td.month != fd.month or td.day != fd.day:
                     if not end:
                         start += 1
                 else:
-                    end = start + 96
+                    end = start + 24 * ratio
                     break
         # 完成与时间相关的处理，删除时间列
-        npts = len(cols[date_col]['list'][start:end:step])
-        cols.pop(date_col)
+        npts = len(cols['date_col']['list'][start:end:step])
+        cols.pop('date_col')
         for col_name in cols:
             cols[col_name]['standard_list'] = cols[col_name]['standard_list'][start:end:step]
             cols[col_name]['npts'] = npts
@@ -389,11 +464,14 @@ def cols_to_csv(cols, path, filename):
     for col_name in cols:
         if cols[col_name]['standard_list']:
             if "有功" in col_name:
-                file_path = os.path.join(path, filename+"_"+"有功.csv")
-                write_log(file_path, cols[col_name]['npts'], 'W', cols[col_name]['max'])
+                file_path = os.path.join(path, filename+ "_" + "有功.csv")
+                write_log(file_path, cols[col_name]['npts'], 'kW', cols[col_name]['max'])
             elif "无功" in col_name:
-                file_path = os.path.join(path, filename+"_"+"无功.csv")
-                write_log(file_path, cols[col_name]['npts'], 'var', cols[col_name]['max'])
+                file_path = os.path.join(path, filename + "_" + "无功.csv")
+                write_log(file_path, cols[col_name]['npts'], 'kvar', cols[col_name]['max'])
+            else:
+                file_path = os.path.join(path, filename + "_" + "standard.csv")
+                write_log(file_path, cols[col_name]['npts'], 'data', cols[col_name]['max'])
             print("正在输出%s" % file_path)
             f = open(file_path, 'w', newline='')
             writer = csv.writer(f, dialect='excel')
@@ -401,6 +479,10 @@ def cols_to_csv(cols, path, filename):
                 writer.writerow([i])
             f.close()
 
+'''
+暂时无用
+还需要将输入的数据写入settings
+'''
 def costomize_settings(settings):
     config_flag = input('是否进行选项设置?(y/n)')
     if config_flag in ['n', 'N']:
@@ -455,3 +537,22 @@ def costomize_settings(settings):
         if time_interval:
             settings['time_interval'] = time_interval
         return settings
+
+if __name__ == '__main__':
+    a = get_csv_list('aileB241P5.1.csv')
+    b = get_csv_column(a, ['值'], 0)
+    c = fix_time_interval(b, '15m')
+    d = max_column_data(c)
+    e = standardize_col_data(d)
+    f = select_data_period(e, '5-01', '15m')
+    g = cols_to_csv(f, '', 'aileB241P5.1.csv')
+    print(e)
+    # a = get_xls_tables('10.1.xls')
+    # b = get_table_column(a, ['瞬时有功(kW)'], 0)
+    # c = max_column_data(b)
+    # d = fix_time_interval(c, '15m')
+    # e = check_missing_data(d)
+    # f = standardize_col_data(e)
+    # g = select_data_period(f, '5-01', '15m')
+    # print(g)
+    pass
