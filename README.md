@@ -37,13 +37,12 @@ meanwhile a file named `data.log` will be generated at the root path of the proj
 
 ##TODO
 
+- <del>a better solution to determine the time delta of the original data<del>
 - <del>csv source data file supported</del>
 - yearly loadshape generator
 - better solution for fixing missing/wrong data
 - auto generate `.dss` file
 - multi-sheets support
-- a better solution to determine the time delta of the original data
-- GUI?
 
 ##change logs
 
@@ -54,6 +53,13 @@ meanwhile a file named `data.log` will be generated at the root path of the proj
   - there are more setting options
   - now the program only complement the missing data in the middle, so it's better to choose a date in the middle in case the original data is not complete
   - this version will process any 'csv' and 'xls' including curve generated last time. This will be soon fixed.
+
+- v0.0.3 (2016-8-18)
+  - using `pyinstaller` to pack the program into a `exe` file.
+  - change the way of reading settings
+  - next I will release v1.0.0, following bugs will be fixed:
+    - will not reprocess the result file generated last time, so you don't need to delete all old result file for a new run.
+    - yearly loadshape of 1h time interval will support(I think it's already supported but I need to do more test)
 
 ----
 If there are any interesting features that can be added to this program to make openDSS modeling easier,

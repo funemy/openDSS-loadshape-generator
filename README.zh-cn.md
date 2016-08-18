@@ -30,5 +30,5 @@
 
 #### 更新方式：
 
-在网址www.github.com/funemy/openDSS-loadshape-generator上下载新修改的程序
+在网址www.github.com/funemy/openDSS-loadshape-generator/releases上下载新修改的程序
 
