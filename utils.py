@@ -483,70 +483,38 @@ def cols_to_csv(cols, path, filename):
 暂时无用
 还需要将输入的数据写入settings
 '''
-def costomize_settings(settings):
-    config_flag = input('是否进行选项设置?(y/n)')
-    if config_flag in ['n', 'N']:
-        return
-    elif config_flag in ['y', 'Y']:
-        print('开始设置，请确认用英文输入法输入')
-        os.system('pause')
-        print('\n设置程序要处理的项目文件夹名\n若程序文件已经在项目文件夹中，则无需填写:\n')
-        project_path = input('请输入:')
-        print('设置存放负荷数据的文件夹\n')
-        data_path = input('请输入:')
-        print('设置要进行处理的表名\n'
-              + '若不填写，则默认处理第一张表\n'
-              + '表名之间用空格分隔\n'
-              + '!!!不建议同时处理多张表\n'
-              + '!!!如非特殊情况不建议设置\n')
-        sheets = input('请输入:')
-        sheets = sheets.split(' ')
-        print('设置要进行处理的数据表索引(从0开始)'
-              + '!!!如非特殊情况不建议设置\n')
-        sheets_index = input('请输入:')
-        sheets_index = sheets_index.split(' ')
-        print('设置需要提取的列名\n'
-              + '不同列名之间用空格分隔\n'
-              + '!!!请保证输入名称与列名完全一致\n'
-              + '!!!若要进行时间处理，请不要将时间列填入此处\n')
-        col_names = input('请输入:')
-        col_names = col_names.split(' ')
-        print('日期序列的列名\n'
-              + '若不填写则输出一列中所有数\n')
-        date_col = input('请输入:')
-        print('设置生成负荷曲线的日期')
-        date = input('请输入:')
-        print('生成负荷曲线的数据点间隔\n'
-              + '目前支持的值为为15m,1h\n'
-              + '输入其他间隔可能会有无法按预期工作\n')
-        time_interval = input('请输入:')
-        if project_path:
-            settings['project_path'] = project_path
-        if data_path:
-            settings['data_path'] = data_path
-        if sheets:
-            settings['sheets'] = sheets
-        if sheets_index:
-            settings['sheets_index'] = sheets_index
-        if col_names:
-            settings['col_names'] = col_names
-        if date_col:
-            settings['date_col'] = date_col
-        if date:
-            settings['date'] = date
-        if time_interval:
-            settings['time_interval'] = time_interval
-        return settings
+def read_settings():
+    f = open('settings.txt', 'r', -1, 'utf-8-sig')
+    settings = {}
+    for row in f.readlines():
+        row = row.strip().split(':')
+        if row[0] in ['sheets', 'sheets_index', 'col_names']:
+            if row[1]:
+                if row[0] == 'sheets_index':
+                    param = row[1].split(',')
+                    param = [int(x) for x in param]
+                else:
+                    param = row[1].split(',')
+                    param = [x.strip() for x in param]
+            else:
+                param = []
+        else:
+            param = row[1].strip()
+            if row[0] == 'date_col_index':
+                param = int(param)
+        settings[row[0]] = param
+    print(settings)
+    return settings
 
 if __name__ == '__main__':
-    a = get_csv_list('aileB241P5.1.csv')
-    b = get_csv_column(a, ['值'], 0)
-    c = fix_time_interval(b, '15m')
-    d = max_column_data(c)
-    e = standardize_col_data(d)
-    f = select_data_period(e, '5-01', '15m')
-    g = cols_to_csv(f, '', 'aileB241P5.1.csv')
-    print(e)
+    # a = get_csv_list('aileB241P5.1.csv')
+    # b = get_csv_column(a, ['值'], 0)
+    # c = fix_time_interval(b, '15m')
+    # d = max_column_data(c)
+    # e = standardize_col_data(d)
+    # f = select_data_period(e, '5-01', '15m')
+    # g = cols_to_csv(f, '', 'aileB241P5.1.csv')
+    # print(e)
     # a = get_xls_tables('10.1.xls')
     # b = get_table_column(a, ['瞬时有功(kW)'], 0)
     # c = max_column_data(b)
@@ -555,4 +523,5 @@ if __name__ == '__main__':
     # f = standardize_col_data(e)
     # g = select_data_period(f, '5-01', '15m')
     # print(g)
+    read_settings()
     pass

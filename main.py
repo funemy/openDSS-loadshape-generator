@@ -3,7 +3,6 @@
 import os
 import csv
 import utils
-from settings import settings
 
 '''
 该程序用于批量处理负荷数据，
@@ -19,16 +18,6 @@ from settings import settings
 
 使用前请配置settings.py文件
 '''
-
-project_path = settings['project_path']
-data_path = settings['data_path']
-sheets = settings['sheets']
-index = settings['sheets_index']
-col_names = settings['col_names']
-date_col = settings['date_col']
-date_col_index = settings['date_col_index']
-date = settings['date']
-time_interval = settings['time_interval']
 
 def process_data(file, path):
     file_path = os.path.join(path, file)
@@ -67,6 +56,18 @@ def batch_standardize_data(project_path, data_path):
                 continue
 
 if __name__ == '__main__':
+    settings = utils.read_settings()
+
+    project_path = settings['project_path']
+    data_path = settings['data_path']
+    sheets = settings['sheets']
+    index = settings['sheets_index']
+    col_names = settings['col_names']
+    date_col = settings['date_col']
+    date_col_index = settings['date_col_index']
+    date = settings['date']
+    time_interval = settings['time_interval']
+
     batch_standardize_data(project_path, data_path)
     print("所有文件处理完成，处理结果保存在data.log文件中，可用记事本打开")
     os.system('pause')

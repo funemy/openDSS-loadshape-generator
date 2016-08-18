@@ -1,0 +1,9 @@
+﻿project_path:
+data_path: data
+sheets:
+sheets_index:
+col_names: 瞬时有功(kW), ←无功(kvar), 值
+date_col:
+date_col_index: 0
+date: 5-01
+time_interval: 15m

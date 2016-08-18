@@ -1,5 +1,9 @@
 /data/*
 /__pycache__/*
+/build/*
+/dist/*
+*.exe
+*.spec
 *.log
 *.csv
 *.xls
