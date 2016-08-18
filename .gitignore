@@ -3,6 +3,7 @@
 /build/*
 /dist/*
 *.exe
+*.zip
 *.spec
 *.log
 *.csv
