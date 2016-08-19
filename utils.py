@@ -129,9 +129,6 @@ def get_time_delta(cols):
     # 获取数据的时间间隔
     delta1 = str_to_datetime(cols['date_col']['list'][0]) - str_to_datetime(cols['date_col']['list'][1])
     delta2 = str_to_datetime(cols['date_col']['list'][-2]) - str_to_datetime(cols['date_col']['list'][-1])
-    # print(cols)
-    # print('d1', delta1)
-    # print('d2', delta2)
     if delta1 == delta2:
         delta = delta1
     else:
@@ -142,6 +139,21 @@ def get_time_delta(cols):
             delta = delta2
     return delta
 
+'''
+辅助类，用于处理csv文件异常
+'''
+class opencsv(object):
+    def __init__(self, path):
+        self.csv_file = open(path)
+
+    def __enter__(self):
+        return self.csv_file
+
+    def __exit__(self, type, value, trackback):
+        if type:
+            print('当前处理的csv文件无法打开，请检查文件是否损坏')
+            os.system('pause')
+        self.csv_file.close()
 
 '''
 读取csv文件
@@ -149,7 +161,7 @@ def get_time_delta(cols):
 暂时无用
 '''
 def get_csv_list(csv_path):
-    with open(csv_path) as csv_file:
+    with opencsv(csv_path) as csv_file:
         reader = csv.reader(csv_file)
         csv_list = list(reader)
     return (csv_list, csv_path)
@@ -162,7 +174,11 @@ index传入索引组成dlist对象
 不传则默认读取全部表
 '''
 def get_xls_tables(xls_path, sheets=[], index=[]):
-    xls_file = xlrd.open_workbook(xls_path)
+    try:
+        xls_file = xlrd.open_workbook(xls_path)
+    except Exception:
+        print('当前处理的xls文件无法打开，请检查文件是否损坏')
+        os.system('pause')
     tables = {}
     if not sheets and not index:
         table = xls_file.sheet_by_index(0)

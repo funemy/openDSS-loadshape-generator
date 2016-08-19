@@ -4,6 +4,8 @@
 
 `data_path`： 数据文件名称，相对于`project_path`
 
+`save_path`： 结果文件的储存地址，相对于`main.exe`
+
 `sheets`： 若`xls`文件有多张表，则选取需要处理的表名。若不填，默认处理第一张表。此参数暂时不能填多张表。
 
 `sheets_index`：作用同上，填写要处理表的序号，从0开始计数。
@@ -18,8 +20,6 @@
 
 `time_interval`： 生成曲线的数据点间隔，可选参数有`5m`/`15m`/`1h`
 
-
-
 #### 格式说明：
 
 - 参数名和参数值之间以**英文冒号**`:`分隔。
@@ -27,8 +27,13 @@
 - 所有参数两侧的空格会被忽略，但是参数中间的空格不会被忽略。请确保数据文件的列名两侧没有空格。
 
 
+#### 其他：
+
+- 程序运行完会自动在`main.exe`所在目录生成`data.log`文件，里面包含了输出文件的具体地址，以及对应文件的最大有名值，数据点数量。方便建模时使用
+- openDSS建模时loadshape引用的文件名似乎不能有括号，程序暂时未作处理，需要手动删除
+
 
 #### 更新方式：
 
-在网址www.github.com/funemy/openDSS-loadshape-generator/releases上下载新修改的程序
+在网址www.github.com/funemy/openDSS-loadshape-generator/releases可下载新修改的程序
 
