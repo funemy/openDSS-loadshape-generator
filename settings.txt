@@ -1,5 +1,6 @@
 ﻿project_path:
 data_path: data
+save_path: result
 sheets:
 sheets_index:
 col_names: 瞬时有功(kW), ←无功(kvar), 值

@@ -1,7 +1,6 @@
 #coding=utf-8
 
 import os
-import csv
 import utils
 
 '''
@@ -38,10 +37,13 @@ def process_data(file, path):
     return cols
 
 
-def output(cols, path, filename):
-    utils.cols_to_csv(cols, path, filename)
+def output(cols, save_path, path, filename):
+    if not os.path.isdir(save_path):
+        print('正在创建储存文件夹...')
+        os.mkdir(save_path)
+    utils.cols_to_csv(cols, save_path, path, filename)
 
-def batch_standardize_data(project_path, data_path):
+def batch_standardize_data(project_path, data_path, save_path):
     utils.check_os()
     utils.clear_log(date)
     path = os.path.join(project_path, data_path)
@@ -51,7 +53,7 @@ def batch_standardize_data(project_path, data_path):
             cols = process_data(file, file_dict['path'])
             if cols:
                 cols = utils.select_data_period(cols, date, time_interval)
-                output(cols, file_dict['path'], file)
+                output(cols, save_path, file_dict['path'], file)
             else:
                 continue
 
@@ -60,6 +62,7 @@ if __name__ == '__main__':
 
     project_path = settings['project_path']
     data_path = settings['data_path']
+    save_path = settings['save_path']
     sheets = settings['sheets']
     index = settings['sheets_index']
     col_names = settings['col_names']
@@ -68,6 +71,6 @@ if __name__ == '__main__':
     date = settings['date']
     time_interval = settings['time_interval']
 
-    batch_standardize_data(project_path, data_path)
+    batch_standardize_data(project_path, data_path, save_path)
     print("所有文件处理完成，处理结果保存在data.log文件中，可用记事本打开")
     os.system('pause')

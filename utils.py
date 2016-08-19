@@ -86,10 +86,10 @@ def isnum(data):
 ext传入字符串或字符串list，代表期望的扩展名
 若文件后缀名在ext的范围中，则返回True
 '''
-def check_ext(filename, ext):
+def check_ext(file_name, ext):
     if type(ext) is str:
         ext = [ext]
-    file_ext = os.path.splitext(filename)[1]
+    file_ext = os.path.splitext(file_name)[1]
     return file_ext in ext
 
 '''
@@ -460,17 +460,18 @@ def select_data_period(cols, date, time_interval):
 '''
 将col的standard_list输出到指定路径
 '''
-def cols_to_csv(cols, path, filename):
+def cols_to_csv(cols, save_path, path, file_name):
+    path = os.path.split(path)[1]
     for col_name in cols:
         if cols[col_name]['standard_list']:
             if "有功" in col_name:
-                file_path = os.path.join(path, filename+ "_" + "有功.csv")
+                file_path = os.path.join(save_path, path + file_name+ "_" + "有功.csv")
                 write_log(file_path, cols[col_name]['npts'], 'kW', cols[col_name]['max'])
             elif "无功" in col_name:
-                file_path = os.path.join(path, filename + "_" + "无功.csv")
+                file_path = os.path.join(save_path, path + file_name + "_" + "无功.csv")
                 write_log(file_path, cols[col_name]['npts'], 'kvar', cols[col_name]['max'])
             else:
-                file_path = os.path.join(path, filename + "_" + "standard.csv")
+                file_path = os.path.join(save_path, path + file_name + "_" + "standard.csv")
                 write_log(file_path, cols[col_name]['npts'], 'data', cols[col_name]['max'])
             print("正在输出%s" % file_path)
             f = open(file_path, 'w', newline='')
@@ -488,6 +489,7 @@ def read_settings():
     settings = {}
     for row in f.readlines():
         row = row.strip().split(':')
+        # 这三项需要初始化为list
         if row[0] in ['sheets', 'sheets_index', 'col_names']:
             if row[1]:
                 if row[0] == 'sheets_index':
@@ -503,7 +505,7 @@ def read_settings():
             if row[0] == 'date_col_index':
                 param = int(param)
         settings[row[0]] = param
-    print(settings)
+    # print(settings)
     return settings
 
 if __name__ == '__main__':
